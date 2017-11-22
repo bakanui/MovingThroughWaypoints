@@ -22,4 +22,8 @@
     Private Sub PictureBox1_Click(sender As Object, e As EventArgs) Handles PictureBox1.Click
         canvas.DrawRectangle(pen, X - 5, Y - 5, 10, 10)
     End Sub
+
+    Private Sub PictureBox1_Paint(ByVal sender As Object, ByVal e As PaintEventArgs) Handles PictureBox1.Paint
+        e.Graphics.DrawEllipse(Pens.Blue, 5, 5, 20, 20)
+    End Sub
 End Class
