@@ -29,9 +29,9 @@ Public Class Form1
         Dim col As Color
     End Structure
 
-    Sub createstraightline(l As tline, pict As PictureBox)
-        Dim gbmp As graphics = graphics.fromimage(bmp1)
-        Dim mybrush As New solidbrush(l.col)
+    Sub createstraightline(ByRef l As tline, pict As PictureBox, cur As Integer)
+        Dim gbmp As Graphics = Graphics.FromImage(bmp1)
+        Dim mybrush As New SolidBrush(l.col)
         Dim dx, dy, d, dr, dur, x, y As Integer
 
         ' While x <> rectList(counter3).X
@@ -112,7 +112,7 @@ Public Class Form1
                         gbmp.FillRectangle(mybrush, q, w, 8, 8)
                         counter2 += 1
                     End While
-                    counter2 = 0
+                    counter2 = cur
                     pict.Image = bmp1
                     Application.DoEvents()
                     System.Threading.Thread.Sleep(10)
@@ -120,10 +120,9 @@ Public Class Form1
                 End While
             Else 'dy < dx
                 While y < l.y2
+                    bmp1 = New Bitmap(707, 284, PixelFormat.Format32bppArgb)
+                    gbmp = Graphics.FromImage(bmp1)
                     gbmp.FillEllipse(mybrush, x, y, l.thickness, l.thickness)
-                    'dim point2 as new point(x * 20, y * 20)
-                    'e.graphics.drawline(pens.black, point1, point2)
-                    'point1 = new point(x * 20, y * 20)
                     If d <= 0 Then
                         'd <= 0 choose r
                         d = d + dr
@@ -140,7 +139,7 @@ Public Class Form1
                         gbmp.FillRectangle(mybrush, q, w, 8, 8)
                         counter2 += 1
                     End While
-                    counter2 = 0
+                    counter2 = cur
                     pict.Image = bmp1
                     Application.DoEvents()
                     System.Threading.Thread.Sleep(10)
@@ -173,7 +172,7 @@ Public Class Form1
                         gbmp.FillRectangle(mybrush, q, w, 8, 8)
                         counter2 += 1
                     End While
-                    counter2 = 0
+                    counter2 = cur
                     pict.Image = bmp1
                     Application.DoEvents()
                     System.Threading.Thread.Sleep(10)
@@ -204,7 +203,7 @@ Public Class Form1
                         gbmp.FillRectangle(mybrush, q, w, 8, 8)
                         counter2 += 1
                     End While
-                    counter2 = 0
+                    counter2 = cur
                     pict.Image = bmp1
                     Application.DoEvents()
                     System.Threading.Thread.Sleep(10)
@@ -238,7 +237,7 @@ Public Class Form1
                         gbmp.FillRectangle(mybrush, q, w, 8, 8)
                         counter2 += 1
                     End While
-                    counter2 = 0
+                    counter2 = cur
                     pict.Image = bmp1
                     Application.DoEvents()
                     System.Threading.Thread.Sleep(10)
@@ -270,7 +269,7 @@ Public Class Form1
                         gbmp.FillRectangle(mybrush, q, w, 8, 8)
                         counter2 += 1
                     End While
-                    counter2 = 0
+                    counter2 = cur
                     pict.Image = bmp1
                     Application.DoEvents()
                     System.Threading.Thread.Sleep(10)
@@ -304,7 +303,7 @@ Public Class Form1
                         gbmp.FillRectangle(mybrush, q, w, 8, 8)
                         counter2 += 1
                     End While
-                    counter2 = 0
+                    counter2 = cur
                     pict.Image = bmp1
                     Application.DoEvents()
                     System.Threading.Thread.Sleep(10)
@@ -336,7 +335,7 @@ Public Class Form1
                         gbmp.FillRectangle(mybrush, q, w, 8, 8)
                         counter2 += 1
                     End While
-                    counter2 = 0
+                    counter2 = cur
                     pict.Image = bmp1
                     Application.DoEvents()
                     System.Threading.Thread.Sleep(10)
@@ -347,10 +346,8 @@ Public Class Form1
             End If
         End If
         gbmp.Dispose()
-
-
-
-        '
+        l.x1 = x
+        l.y1 = y
     End Sub
 
     Private Sub createWaypoints(ByVal x As Integer, ByVal y As Integer)
@@ -377,12 +374,13 @@ Public Class Form1
             createWaypoints(pX, pY)
             counter = counter + 1
         End If
-
     End Sub
+
     Private Sub mouse_move(sender As Object, e As MouseEventArgs) Handles PictureBox1.MouseMove
         TextBox1.Text = e.X
         TextBox2.Text = e.Y
     End Sub
+
     Private Sub Timer1_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Timer1.Tick
         'PictureBox2.Location = New Point(a3 + 5, a4 + 20)
         ' x= 41y=175
@@ -449,15 +447,19 @@ Public Class Form1
         'If rectList.Count >= 1 Then
         l.x1 = 41
         l.y1 = 175
-        l.x2 = rectList(counter2).X
-        l.y2 = rectList(counter2).Y
+        'l.x2 = rectList(counter2).X
+        'l.y2 = rectList(counter2).Y
         l.col = Color.Black
-        While counter3 <> counter + 1
-            createstraightline(l, PictureBox1)
-            l.x1 = l.x2
-            l.y1 = l.y2
-            counter3 += 1
-        End While
+        'While counter3 <> counter + 1
+        For i = 0 To counter - 1
+            l.x2 = rectList(i).X
+            l.y2 = rectList(i).Y
+            createstraightline(l, PictureBox1, i)
+        Next
+        '    l.x1 = l.x2
+        '    l.y1 = l.y2
+        '    counter3 += 1
+        'End While
         'End If
     End Sub
 
@@ -484,7 +486,6 @@ Public Class Form1
     '    mycar.Height = 10
     '    e.Graphics.FillEllipse(Brushes.Black, mycar)
     'End Sub
-
 
     Private Sub SpdBox_Clicked(sender As Object, e As EventArgs) Handles SpdBox.Click
         SpdBox.Text = ""
