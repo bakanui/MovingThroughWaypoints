@@ -10,6 +10,8 @@ Public Class Form1
     Dim klik As Rectangle = New Rectangle(0, 0, 0, 0)
     Dim pX, pY As Integer
     Dim mycar As New Rectangle
+    Dim acceleration As Double = 0.02
+    Dim speed As Double
 
     Function abs(n As Integer) As Integer
         If n < 0 Then
@@ -463,6 +465,13 @@ Public Class Form1
         'End If
     End Sub
 
+    Private Sub Timer2_Tick(sender As Object, e As EventArgs) Handles Timer2.Tick
+        speed += acceleration
+        PictureBox1.Location = New Point(PictureBox1.Location.X, PictureBox1.Location.Y + speed)
+    End Sub
+
+
+
     'Private Sub CarBtn_Click(sender As Object, e As EventArgs) Handles CarBtn.Click
 
     '    Dim myPen As Pen
@@ -490,4 +499,6 @@ Public Class Form1
     Private Sub SpdBox_Clicked(sender As Object, e As EventArgs) Handles SpdBox.Click
         SpdBox.Text = ""
     End Sub
+
+
 End Class
