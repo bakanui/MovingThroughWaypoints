@@ -1,20 +1,61 @@
-﻿Imports System.Drawing.Imaging
-Imports System.IO
+﻿Public Class Form1
+    Dim X As Integer
+    Dim Y As Integer
+    Dim canvas As Graphics
+    Dim waypoints = New List(Of Rectangle)
+    Dim car = New Rectangle(5, 5, 20, 20)
+    Dim carPositions = New List(Of Point)
+    Dim waypointCounter As Integer = 0
+    Dim carPosCounter As Integer = 0
+    Dim speed As Integer
 
-Public Class Form1
-    Dim rectList As New List(Of Rectangle)
-    Dim counter As Integer = 0
-    Dim counter2 As Integer = 0
-    Dim counter3 As Integer = 0
-    Public bmp1 As New Bitmap(707, 284, PixelFormat.Format32bppArgb)
-    Dim klik As Rectangle = New Rectangle(0, 0, 0, 0)
-    Dim pX, pY As Integer
-    Dim mycar As New Rectangle
-    Dim acceleration As Double = 0.02
-    Dim speed As Double
-    Dim image As New Bitmap(640, 480)
-    Dim gfx As Drawing.Graphics = Drawing.Graphics.FromImage(image)
-    Dim drawPoint As Drawing.Point
+    Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        canvas = PictureBox1.CreateGraphics()
+    End Sub
+    Private Sub PictureBox1_MouseMove(ByVal sender As Object, ByVal e As MouseEventArgs) Handles PictureBox1.MouseMove
+        X = e.X - 5
+        Y = e.Y - 5
+        Coordinates.Text = (X & ", " & Y)
+    End Sub
+
+    Private Sub PictureBox1_Click(sender As Object, e As EventArgs) Handles PictureBox1.Click
+        Dim waypoint = New Rectangle(X, Y, 10, 10)
+        canvas.DrawRectangle(Pens.Black, X, Y, 10, 10)
+        waypoints.Add(waypoint)
+    End Sub
+    Private Sub PictureBox1_Paint(ByVal sender As Object, ByVal e As PaintEventArgs) Handles PictureBox1.Paint
+        e.Graphics.DrawEllipse(Pens.Blue, car)
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles StrtBtn.Click
+        If SpdBox.Text = "" Then
+            MessageBox.Show("You cannot leave the speed box empty!", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        ElseIf SpdBox.Text < 0 Or SpdBox.Text > 100 Then
+            MessageBox.Show("The car can only go from 1-100.", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        ElseIf SpdBox.Text = 0 Then
+            MessageBox.Show("You can't expect a car to move with a speed of 0.", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Else
+            carMovement()
+            speed = 101 - SpdBox.Text
+            moveCar.Interval = speed
+            moveCar.Enabled = True
+        End If
+    End Sub
+
+    Private Sub moveCar_Tick(sender As Object, e As EventArgs) Handles moveCar.Tick
+        canvas.DrawEllipse(Pens.White, car)
+        If carPosCounter < carPositions.Count Then
+            car.Location = carPositions(carPosCounter)
+            carPosCounter = carPosCounter + 1
+        Else
+            moveCar.Enabled = False
+        End If
+        canvas.DrawEllipse(Pens.Blue, car)
+    End Sub
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles StpBtn.Click
+        moveCar.Enabled = False
+    End Sub
 
     Function abs(n As Integer) As Integer
         If n < 0 Then
@@ -25,499 +66,172 @@ Public Class Form1
         Return n
     End Function
 
-    Structure tline
-        Dim x1 As Integer
-        Dim y1 As Integer
-        Dim x2 As Integer
-        Dim y2 As Integer
-        Dim thickness As Integer
-        Dim col As Color
-    End Structure
-
-    Sub createstraightline(ByRef l As tline, pict As PictureBox, cur As Integer)
-        Dim gbmp As Graphics = Graphics.FromImage(bmp1)
-        Dim mybrush As New SolidBrush(l.col)
-        Dim dx, dy, d, dr, dur, x, y As Integer
-
+    Sub carMovement()
+        Dim dx, dy, d, dr, dur, x, y, NextPosX, NextPosY As Integer
+        Dim p As Point
         ' While x <> rectList(counter3).X
         'init
-        dx = l.x2 - l.x1
-        dy = l.y2 - l.y1
-        l.col = Color.Black
+        y = car.Location.Y
+        x = car.Location.X
+        NextPosX = x
+        NextPosY = y
         'f.e
-        If l.x1 <= l.x2 And l.y1 <= l.y2 Then
-            If dx >= dy Then
-                dr = 2 * dy
-                dur = 2 * (dy - dx)
-                d = 2 * dy - dx
-            Else 'dy < dx
-                dr = 2 * dx
-                dur = 2 * (dx - dy)
-                d = 2 * dx - dy
+        While waypointCounter < waypoints.Count
+            dx = waypoints(waypointCounter).X - NextPosX
+            dy = waypoints(waypointCounter).Y - NextPosY
+            If NextPosX <= waypoints(waypointCounter).X And NextPosY <= waypoints(waypointCounter).Y - 5 Then
+                If dx >= dy Then
+                    dr = 2 * dy
+                    dur = 2 * (dy - dx)
+                    d = 2 * dy - dx
+                Else 'dy < dx
+                    dr = 2 * dx
+                    dur = 2 * (dx - dy)
+                    d = 2 * dx - dy
+                End If
+            ElseIf NextPosX > waypoints(waypointCounter).X And NextPosY <= waypoints(waypointCounter).Y - 5 Then
+                If abs(dx) >= abs(dy) Then
+                    dr = -2 * dy
+                    dur = -2 * (dx + dy)
+                    d = -dx - 2 * dy
+                Else 'dy < dx
+                    dr = -2 * dx
+                    dur = -2 * (dy + dx)
+                    d = -dy - 2 * dx
+                End If
+            ElseIf NextPosX <= waypoints(waypointCounter).X And NextPosY > waypoints(waypointCounter).Y - 5 Then
+                If abs(dx) >= abs(dy) Then
+                    dr = 2 * dy
+                    dur = 2 * (dy + dx)
+                    d = 2 * dy + dx
+                Else 'dy < dx
+                    dr = 2 * dx
+                    dur = 2 * (dx + dy)
+                    d = 2 * dx + dy
+                End If
+            ElseIf NextPosX > waypoints(waypointCounter).X And NextPosY > waypoints(waypointCounter).Y - 5 Then
+                If abs(dx) >= abs(dy) Then
+                    dr = -2 * dy
+                    dur = -2 * (dy - dx)
+                    d = dx - 2 * dy
+                Else 'dy < dx
+                    dr = -2 * dx
+                    dur = -2 * (dx - dy)
+                    d = -dx - 2 * dy
+                End If
             End If
-        ElseIf l.x1 > l.x2 And l.y1 <= l.y2 Then
-            If abs(dx) >= abs(dy) Then
-                dr = -2 * dy
-                dur = -2 * (dx + dy)
-                d = -dx - 2 * dy
-            Else 'dy < dx
-                dr = -2 * dx
-                dur = -2 * (dy + dx)
-                d = -dy - 2 * dx
-            End If
-        ElseIf l.x1 <= l.x2 And l.y1 > l.y2 Then
-            If abs(dx) >= abs(dy) Then
-                dr = 2 * dy
-                dur = 2 * (dy + dx)
-                d = 2 * dy + dx
-            Else 'dy < dx
-                dr = 2 * dx
-                dur = 2 * (dx + dy)
-                d = 2 * dx + dy
-            End If
-        ElseIf l.x1 > l.x2 And l.y1 > l.y2 Then
-            If abs(dx) >= abs(dy) Then
-                dr = -2 * dy
-                dur = -2 * (dy - dx)
-                d = dx - 2 * dy
-            Else 'dy < dx
-                dr = -2 * dx
-                dur = -2 * (dx - dy)
-                d = -dx - 2 * dy
-            End If
-        End If
-        y = l.y1
-        x = l.x1
-        dx = abs(dx)
-        dy = abs(dy)
-        'dim point1 as new point(x1 * 20, y1 * 20)
-        If l.x1 <= l.x2 And l.y1 <= l.y2 Then
-            If dx >= dy Then
-                While x < l.x2
-                    bmp1 = New Bitmap(707, 284, PixelFormat.Format32bppArgb)
-                    gbmp = Graphics.FromImage(bmp1)
-                    gbmp.FillEllipse(mybrush, x, y, l.thickness, l.thickness)
-                    'dim point2 as new point(x * 20, y * 20)
-                    'e.graphics.drawline(pens.black, point1, point2)
-                    'point1 = new point(x * 20, y * 20)
-                    If d <= 0 Then
-                        'd <= 0 choose r
-                        d = d + dr
-                    Else 'd>0, choose ur
-                        d = d + dur
-                        y = y + 1
-                    End If
-                    'gbmp.dispose()
-                    While counter2 <> counter
-                        Dim a1 As Rectangle
-                        Dim q, w As Integer
-                        a1 = rectList(counter2)
-                        q = a1.X
-                        w = a1.Y
-                        gbmp.FillRectangle(mybrush, q, w, 8, 8)
-                        counter2 += 1
+            dx = abs(dx)
+            dy = abs(dy)
+            'dim point1 as new point(x1 * 20, y1 * 20)
+            If NextPosX <= waypoints(waypointCounter).X - 5 And NextPosY <= waypoints(waypointCounter).Y - 5 Then
+                If dx >= dy Then
+                    While x < waypoints(waypointCounter).X - 5
+                        carPositions.Add(New Point(x, y))
+                        If d <= 0 Then
+                            'd <= 0 choose r
+                            d = d + dr
+                        Else 'd>0, choose ur
+                            d = d + dur
+                            y = y + 1
+                        End If
+                        x += 1
                     End While
-                    counter2 = cur
-                    pict.Image = bmp1
-                    Application.DoEvents()
-                    System.Threading.Thread.Sleep(10)
-                    x += 1
-                End While
-            Else 'dy < dx
-                While y < l.y2
-                    bmp1 = New Bitmap(707, 284, PixelFormat.Format32bppArgb)
-                    gbmp = Graphics.FromImage(bmp1)
-                    gbmp.FillEllipse(mybrush, x, y, l.thickness, l.thickness)
-                    If d <= 0 Then
-                        'd <= 0 choose r
-                        d = d + dr
-                    Else 'd>0, choose ur
-                        d = d + dur
-                        x = x + 1
-                    End If
-                    While counter2 <> counter
-                        Dim a1 As Rectangle
-                        Dim q, w As Integer
-                        a1 = rectList(counter2)
-                        q = a1.X
-                        w = a1.Y
-                        gbmp.FillRectangle(mybrush, q, w, 8, 8)
-                        counter2 += 1
+                Else 'dy < dx
+                    While y < waypoints(waypointCounter).Y - 5
+                        carPositions.Add(New Point(x, y))
+                        If d <= 0 Then
+                            'd <= 0 choose r
+                            d = d + dr
+                        Else 'd>0, choose ur
+                            d = d + dur
+                            x = x + 1
+                        End If
+                        y += 1
                     End While
-                    counter2 = cur
-                    pict.Image = bmp1
-                    Application.DoEvents()
-                    System.Threading.Thread.Sleep(10)
-                    'gbmp.dispose()
-                    y += 1
-                End While
+                End If
+            ElseIf NextPosX > waypoints(waypointCounter).X - 5 And NextPosY <= waypoints(waypointCounter).Y - 5 Then
+                If dx >= dy Then
+                    While x > waypoints(waypointCounter).X - 5
+                        carPositions.Add(New Point(x, y))
+                        If d > 0 Then
+                            'd <= 0 choose r
+                            d = d + dr
+                        Else 'd>0, choose ur
+                            d = d + dur
+                            y = y + 1
+                        End If
+                        x -= 1
+                    End While
+                Else 'dy < dx
+                    While y < waypoints(waypointCounter).Y
+                        carPositions.Add(New Point(x, y))
+                        If d <= 0 Then
+                            'd <= 0 choose r
+                            d = d + dr
+                        Else 'd>0, choose ur
+                            d = d + dur
+                            x = x - 1
+                        End If
+                        y += 1
+                    End While
+                End If
+            ElseIf NextPosX <= waypoints(waypointCounter).X - 5 And NextPosY > waypoints(waypointCounter).Y Then
+                If dx >= dy Then
+                    While x < waypoints(waypointCounter).X - 5
+                        carPositions.Add(New Point(x, y))
+                        If d > 0 Then
+                            'd <= 0 choose r
+                            d = d + dr
+                        Else 'd>0, choose ur
+                            d = d + dur
+                            y = y - 1
+                        End If
+                        x += 1
+                    End While
+                Else 'dy > dx
+                    While y > waypoints(waypointCounter).Y
+                        carPositions.Add(New Point(x, y))
+                        If d <= 0 Then
+                            'd <= 0 choose r
+                            d = d + dr
+                        Else 'd>0, choose ur
+                            d = d + dur
+                            x = x + 1
+                        End If
+                        y -= 1
+                    End While
+                End If
+            ElseIf NextPosX > waypoints(waypointCounter).X - 5 And NextPosY > waypoints(waypointCounter).Y Then
+                If dx >= dy Then
+                    While x > waypoints(waypointCounter).X - 5
+                        carPositions.Add(New Point(x, y))
+                        If d <= 0 Then
+                            'd <= 0 choose r
+                            d = d + dr
+                        Else 'd>0, choose ur
+                            d = d + dur
+                            y = y - 1
+                        End If
+                        x -= 1
+                    End While
+                Else 'dy > dx
+                    While y > waypoints(waypointCounter).Y
+                        carPositions.Add(New Point(x, y))
+                        If d <= 0 Then
+                            'd <= 0 choose r
+                            d = d + dr
+                        Else 'd>0, choose ur
+                            d = d + dur
+                            x = x - 1
+                        End If
+                        y -= 1
+                    End While
+                End If
             End If
-        ElseIf l.x1 > l.x2 And l.y1 <= l.y2 Then
-            If dx >= dy Then
-                While x > l.x2
-                    bmp1 = New Bitmap(707, 284, PixelFormat.Format32bppArgb)
-                    gbmp = Graphics.FromImage(bmp1)
-                    gbmp.FillEllipse(mybrush, x, y, l.thickness, l.thickness)
-                    'dim point2 as new point(x * 20, y * 20)
-                    'e.graphics.drawline(pens.black, point1, point2)
-                    'point1 = new point(x * 20, y * 20)
-                    If d > 0 Then
-                        'd <= 0 choose r
-                        d = d + dr
-                    Else 'd>0, choose ur
-                        d = d + dur
-                        y = y + 1
-                    End If
-                    While counter2 <> counter
-                        Dim a1 As Rectangle
-                        Dim q, w As Integer
-                        a1 = rectList(counter2)
-                        q = a1.X
-                        w = a1.Y
-                        gbmp.FillRectangle(mybrush, q, w, 8, 8)
-                        counter2 += 1
-                    End While
-                    counter2 = cur
-                    pict.Image = bmp1
-                    Application.DoEvents()
-                    System.Threading.Thread.Sleep(10)
-                    'gbmp.dispose()
-                    x -= 1
-                End While
-            Else 'dy < dx
-                While y < l.y2
-                    bmp1 = New Bitmap(707, 284, PixelFormat.Format32bppArgb)
-                    gbmp = Graphics.FromImage(bmp1)
-                    gbmp.FillEllipse(mybrush, x, y, l.thickness, l.thickness)
-                    'dim point2 as new point(x * 20, y * 20)
-                    'e.graphics.drawline(pens.black, point1, point2)
-                    'point1 = new point(x * 20, y * 20)
-                    If d <= 0 Then
-                        'd <= 0 choose r
-                        d = d + dr
-                    Else 'd>0, choose ur
-                        d = d + dur
-                        x = x - 1
-                    End If
-                    While counter2 <> counter
-                        Dim a1 As Rectangle
-                        Dim q, w As Integer
-                        a1 = rectList(counter2)
-                        q = a1.X
-                        w = a1.Y
-                        gbmp.FillRectangle(mybrush, q, w, 8, 8)
-                        counter2 += 1
-                    End While
-                    counter2 = cur
-                    pict.Image = bmp1
-                    Application.DoEvents()
-                    System.Threading.Thread.Sleep(10)
-                    'gbmp.dispose()
-                    'bmp1 = new bitmap(823,275, pixelformat.format32bppargb)
-                    y += 1
-                End While
-            End If
-        ElseIf l.x1 <= l.x2 And l.y1 > l.y2 Then
-            If dx >= dy Then
-                While x < l.x2
-                    bmp1 = New Bitmap(707, 284, PixelFormat.Format32bppArgb)
-                    gbmp = Graphics.FromImage(bmp1)
-                    gbmp.FillEllipse(mybrush, x, y, l.thickness, l.thickness)
-                    'dim point2 as new point(x * 20, y * 20)
-                    'e.graphics.drawline(pens.black, point1, point2)
-                    'point1 = new point(x * 20, y * 20)
-                    If d > 0 Then
-                        'd <= 0 choose r
-                        d = d + dr
-                    Else 'd>0, choose ur
-                        d = d + dur
-                        y = y - 1
-                    End If
-                    While counter2 <> counter
-                        Dim a1 As Rectangle
-                        Dim q, w As Integer
-                        a1 = rectList(counter2)
-                        q = a1.X
-                        w = a1.Y
-                        gbmp.FillRectangle(mybrush, q, w, 8, 8)
-                        counter2 += 1
-                    End While
-                    counter2 = cur
-                    pict.Image = bmp1
-                    Application.DoEvents()
-                    System.Threading.Thread.Sleep(10)
-                    'gbmp.dispose()
-                    'bmp1 = new bitmap(823,275, pixelformat.format32bppargb)
-                    x += 1
-                End While
-            Else 'dy > dx
-                While y > l.y2
-                    bmp1 = New Bitmap(707, 284, PixelFormat.Format32bppArgb)
-                    gbmp = Graphics.FromImage(bmp1)
-                    gbmp.FillEllipse(mybrush, x, y, l.thickness, l.thickness)
-                    'dim point2 as new point(x * 20, y * 20)
-                    'e.graphics.drawline(pens.black, point1, point2)
-                    'point1 = new point(x * 20, y * 20)
-                    If d <= 0 Then
-                        'd <= 0 choose r
-                        d = d + dr
-                    Else 'd>0, choose ur
-                        d = d + dur
-                        x = x + 1
-                    End If
-                    While counter2 <> counter
-                        Dim a1 As Rectangle
-                        Dim q, w As Integer
-                        a1 = rectList(counter2)
-                        q = a1.X
-                        w = a1.Y
-                        gbmp.FillRectangle(mybrush, q, w, 8, 8)
-                        counter2 += 1
-                    End While
-                    counter2 = cur
-                    pict.Image = bmp1
-                    Application.DoEvents()
-                    System.Threading.Thread.Sleep(10)
-                    'gbmp.dispose()
-                    'bmp1 = new bitmap(823,275, pixelformat.format32bppargb)
-                    y -= 1
-                End While
-            End If
-        ElseIf l.x1 > l.x2 And l.y1 > l.y2 Then
-            If dx >= dy Then
-                While x > l.x2
-                    bmp1 = New Bitmap(707, 284, PixelFormat.Format32bppArgb)
-                    gbmp = Graphics.FromImage(bmp1)
-                    gbmp.FillEllipse(mybrush, x, y, l.thickness, l.thickness)
-                    'dim point2 as new point(x * 20, y * 20)
-                    'e.graphics.drawline(pens.black, point1, point2)
-                    'point1 = new point(x * 20, y * 20)
-                    If d <= 0 Then
-                        'd <= 0 choose r
-                        d = d + dr
-                    Else 'd>0, choose ur
-                        d = d + dur
-                        y = y - 1
-                    End If
-                    While counter2 <> counter
-                        Dim a1 As Rectangle
-                        Dim q, w As Integer
-                        a1 = rectList(counter2)
-                        q = a1.X
-                        w = a1.Y
-                        gbmp.FillRectangle(mybrush, q, w, 8, 8)
-                        counter2 += 1
-                    End While
-                    counter2 = cur
-                    pict.Image = bmp1
-                    Application.DoEvents()
-                    System.Threading.Thread.Sleep(10)
-                    gbmp.Dispose()
-                    'bmp1 = new bitmap(823,275, pixelformat.format32bppargb)
-                    x -= 1
-                End While
-            Else 'dy > dx
-                While y > l.y2
-                    bmp1 = New Bitmap(707, 284, PixelFormat.Format32bppArgb)
-                    gbmp = Graphics.FromImage(bmp1)
-                    gbmp.FillEllipse(mybrush, x, y, l.thickness, l.thickness)
-                    'dim point2 as new point(x * 20, y * 20)
-                    'e.graphics.drawline(pens.black, point1, point2)
-                    'point1 = new point(x * 20, y * 20)
-                    If d <= 0 Then
-                        'd <= 0 choose r
-                        d = d + dr
-                    Else 'd>0, choose ur
-                        d = d + dur
-                        x = x - 1
-                    End If
-                    While counter2 <> counter
-                        Dim a1 As Rectangle
-                        Dim q, w As Integer
-                        a1 = rectList(counter2)
-                        q = a1.X
-                        w = a1.Y
-                        gbmp.FillRectangle(mybrush, q, w, 8, 8)
-                        counter2 += 1
-                    End While
-                    counter2 = cur
-                    pict.Image = bmp1
-                    Application.DoEvents()
-                    System.Threading.Thread.Sleep(10)
-                    gbmp.Dispose()
-                    'bmp1 = new bitmap(823,275, pixelformat.format32bppargb)
-                    y -= 1
-                End While
-            End If
-        End If
-        gbmp.Dispose()
-        l.x1 = x
-        l.y1 = y
+            waypointCounter += 1
+            NextPosY = y
+            NextPosX = x
+        End While
     End Sub
-
-    Private Sub createWaypoints(ByVal x As Integer, ByVal y As Integer)
-        Dim myGraphics As Graphics = PictureBox1.CreateGraphics
-        If CheckBox1.Checked = True Then
-            klik = New Rectangle(x, y, 0, 0)
-            rectList.Add(klik)
-            If rectList.Count > 0 Then
-                myGraphics.FillRectangle(Brushes.Black, x, y, 8, 8)
-                ListBox1.Items.Add(klik)
-            End If
-        End If
-    End Sub
-
-    'Private Sub PictureBox1_MouseClick(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseClick
-    '    createWaypoints(e.X, e.Y)
-    'End Sub
-    Private Sub canvas_Click(sender As Object, e As EventArgs) Handles PictureBox1.Click
-        Dim a1 As Point
-        If CheckBox1.Checked Then
-            a1 = PictureBox1.PointToClient(Control.MousePosition)
-            pX = a1.X
-            pY = a1.Y
-            createWaypoints(pX, pY)
-            counter = counter + 1
-        End If
-    End Sub
-
-    Private Sub mouse_move(sender As Object, e As MouseEventArgs) Handles PictureBox1.MouseMove
-        TextBox1.Text = e.X
-        TextBox2.Text = e.Y
-    End Sub
-
-    Private Sub Timer1_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Timer1.Tick
-        'PictureBox2.Location = New Point(a3 + 5, a4 + 20)
-        ' x= 41y=175
-    End Sub
-
-    'Private Sub strtbtn_click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles StrtBtn.Click
-    '    Dim a1, a2, a3, a4 As Integer
-    '    Dim p As point
-    '    a1 = rectlist(counter2).x
-    '    a2 = rectlist(counter2).y
-    '    a3 = picturebox2.location.x
-    '    a4 = picturebox2.location.y
-    '    While counter2 < counter
-    '        While rectList(counter2).X <> PictureBox2.Location.X Or rectList(counter2).Y <> PictureBox2.Location.Y
-    '            If rectList(counter2).X <> PictureBox2.Location.X AndAlso rectList(counter2).X > PictureBox2.Location.X Then
-    '                a3 = a3 + 1
-    '            ElseIf rectList(counter2).X <> PictureBox2.Location.X AndAlso rectList(counter2).X < PictureBox2.Location.X Then
-    '                a3 = a3 - 1
-    '            End If
-    '            If rectList(counter2).Y <> PictureBox2.Location.Y AndAlso rectList(counter2).Y > PictureBox2.Location.Y Then
-    '                a4 = a4 + 1
-    '            ElseIf rectList(counter2).Y <> PictureBox2.Location.Y AndAlso rectList(counter2).Y < PictureBox2.Location.Y Then
-    '                a4 = a4 - 1
-    '            End If
-    '            p = New Point(a3, a4)
-    '            PictureBox2.Location = p
-    '            System.Threading.Thread.Sleep(SpdBox.Text)
-    '        End While
-    '        counter2 = counter2 + 1
-    '    End While
-    '    Timer1.Enabled = True
-    'End Sub
-
-    Private Sub StpBtn_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles StpBtn.Click
-        Timer1.Enabled = False
-    End Sub
-
-    Public Sub RstBtn_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles RstBtn.Click
-        'PictureBox2.Left = 41
-        'PictureBox2.Top = 175
-        PictureBox1.Refresh()
-        rectList.Clear()
-        bmp1 = New Bitmap(PictureBox1.Width, PictureBox1.Height)
-        PictureBox1.Image = bmp1
-        counter = 0
-        ListBox1.Items.Clear()
-        Timer1.Enabled = False
-        counter3 = 0
-        counter2 = 0
-        counter = 0
-    End Sub
-
-    Sub initline(ByRef l As tline)
-        l.x1 = 0
-        l.y1 = 0
-        l.x2 = 0
-        l.y2 = 0
-        l.thickness = 10
-    End Sub
-
-    Private Sub strtbtn_click(sender As Object, e As EventArgs) Handles StrtBtn.Click
-        Dim l As tline
-        initline(l)
-        'If rectList.Count >= 1 Then
-        l.x1 = 41
-        l.y1 = 175
-        'l.x2 = rectList(counter2).X
-        'l.y2 = rectList(counter2).Y
-        l.col = Color.Black
-        'While counter3 <> counter + 1
-        For i = 0 To counter - 1
-            l.x2 = rectList(i).X
-            l.y2 = rectList(i).Y
-            createstraightline(l, PictureBox1, i)
-        Next
-        '    l.x1 = l.x2
-        '    l.y1 = l.y2
-        '    counter3 += 1
-        'End While
-        'End If
-    End Sub
-
-    Private Sub Timer2_Tick(sender As Object, e As EventArgs)
-        speed += acceleration
-        PictureBox1.Location = New Point(PictureBox1.Location.X, PictureBox1.Location.Y + speed)
-    End Sub
-
-    Private Sub Timer2_Tick_1(sender As Object, e As EventArgs) Handles Timer2.Tick
-        Dim offsetX As Integer
-        Dim offsetY As Integer
-        Dim SpeedX As Integer
-        Dim SpeedY As Integer
-
-        offsetX = (Cursor.Position.X - Me.Location.X - PictureBox1.Location.X - 4) - drawPoint.X
-        offsetY = (Cursor.Position.Y - Me.Location.Y - PictureBox1.Location.Y - 30) - drawPoint.Y
-
-        SpeedX = offsetX * 0.1
-        SpeedY = offsetY * 0.1
-
-        gfx.DrawLine(Pens.Black, 0, 0, drawPoint.X, drawPoint.Y)
-        PictureBox1.Image = image
-    End Sub
-
-
-
-    'Private Sub CarBtn_Click(sender As Object, e As EventArgs) Handles CarBtn.Click
-
-    '    Dim myPen As Pen
-    '    myPen = New Pen(Drawing.Color.DarkTurquoise, 5)
-
-    '    Dim myGraphics As Graphics = PictureBox1.CreateGraphics
-    '    Dim myRectangle As New Rectangle
-
-    '    myRectangle.X = 40
-    '    myRectangle.Y = 30
-    '    myRectangle.Width = 10
-    '    myRectangle.Height = 10
-
-    '    myGraphics.DrawEllipse(myPen, myRectangle)
-    'End Sub
-
-    'Private Sub form1_Paint(ByVal sender As System.Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles Me.Paint
-    '    mycar.X = 100
-    '    mycar.Y = 100
-    '    mycar.Width = 10
-    '    mycar.Height = 10
-    '    e.Graphics.FillEllipse(Brushes.Black, mycar)
-    'End Sub
-
-    Private Sub SpdBox_Clicked(sender As Object, e As EventArgs) Handles SpdBox.Click
-        SpdBox.Text = ""
-    End Sub
-
 
 End Class
