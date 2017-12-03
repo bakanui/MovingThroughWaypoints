@@ -12,6 +12,9 @@ Public Class Form1
     Dim mycar As New Rectangle
     Dim acceleration As Double = 0.02
     Dim speed As Double
+    Dim image As New Bitmap(640, 480)
+    Dim gfx As Drawing.Graphics = Drawing.Graphics.FromImage(image)
+    Dim drawPoint As Drawing.Point
 
     Function abs(n As Integer) As Integer
         If n < 0 Then
@@ -465,9 +468,25 @@ Public Class Form1
         'End If
     End Sub
 
-    Private Sub Timer2_Tick(sender As Object, e As EventArgs) Handles Timer2.Tick
+    Private Sub Timer2_Tick(sender As Object, e As EventArgs)
         speed += acceleration
         PictureBox1.Location = New Point(PictureBox1.Location.X, PictureBox1.Location.Y + speed)
+    End Sub
+
+    Private Sub Timer2_Tick_1(sender As Object, e As EventArgs) Handles Timer2.Tick
+        Dim offsetX As Integer
+        Dim offsetY As Integer
+        Dim SpeedX As Integer
+        Dim SpeedY As Integer
+
+        offsetX = (Cursor.Position.X - Me.Location.X - PictureBox1.Location.X - 4) - drawPoint.X
+        offsetY = (Cursor.Position.Y - Me.Location.Y - PictureBox1.Location.Y - 30) - drawPoint.Y
+
+        SpeedX = offsetX * 0.1
+        SpeedY = offsetY * 0.1
+
+        gfx.DrawLine(Pens.Black, 0, 0, drawPoint.X, drawPoint.Y)
+        PictureBox1.Image = image
     End Sub
 
 
