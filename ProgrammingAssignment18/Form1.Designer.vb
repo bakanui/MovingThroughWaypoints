@@ -90,7 +90,7 @@ Partial Class Form1
         'Coordinates
         '
         Me.Coordinates.AutoSize = True
-        Me.Coordinates.Location = New System.Drawing.Point(1034, 29)
+        Me.Coordinates.Location = New System.Drawing.Point(1004, 29)
         Me.Coordinates.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Coordinates.Name = "Coordinates"
         Me.Coordinates.Size = New System.Drawing.Size(29, 17)
