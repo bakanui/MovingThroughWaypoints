@@ -33,11 +33,13 @@
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles StrtBtn.Click
         decelerate = False
         If SpdBox.Text = "" Then
-            MessageBox.Show("You cannot leave the speed box empty!", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("The speed box cannot be left empty!", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
         ElseIf SpdBox.Text < 0 Or SpdBox.Text > 100 Then
             MessageBox.Show("The car can only go from 1-100.", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
         ElseIf SpdBox.Text = 0 Then
             MessageBox.Show("You can't expect a car to move with a speed of 0.", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        ElseIf waypoints.Count = 0 Then
+            MessageBox.Show("The car needs waypoints to pass through. Please input the waypoints.", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Else
             If firstTime = True Then
                 carMovement()
@@ -60,14 +62,14 @@
                 speed = speed - 5
                 moveCar.Interval = speed
             End If
-            If carPosCounter < carPositions.Count Then
+            If carPosCounter < carPositions.Count - 10 Then
                 car.Location = carPositions(carPosCounter)
                 carPosCounter = carPosCounter + 1
             Else
-                moveCar.Enabled = False
+                decelerate = True
             End If
         Else
-            If decCounter < 5 Then
+            If decCounter < 10 Then
                 car.Location = carPositions(carPosCounter)
                 carPosCounter = carPosCounter + 1
                 If speed < 105 Then
@@ -75,7 +77,7 @@
                     moveCar.Interval = speed
                 End If
             End If
-            If speed >= 105 Then
+            If speed >= 105 Or carPosCounter = carPositions.Count Then
                 moveCar.Enabled = False
             End If
         End If
@@ -263,4 +265,20 @@
         End While
     End Sub
 
+    Private Sub RstBtn_Click(sender As Object, e As EventArgs) Handles RstBtn.Click
+        moveCar.Enabled = False
+        SpdBox.Text = ""
+        TorqBox.Text = ""
+        waypoints.clear()
+        PictureBox1.Refresh()
+        canvas.DrawEllipse(Pens.White, car)
+        car.Location = New Point(5, 5)
+        canvas.DrawEllipse(Pens.Blue, car)
+        carPositions.clear()
+        waypointCounter = 0
+        carPosCounter = 0
+        decelerate = False
+        firstTime = True
+        decCounter = 0
+    End Sub
 End Class
