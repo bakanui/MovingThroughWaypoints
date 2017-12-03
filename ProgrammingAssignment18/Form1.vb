@@ -8,6 +8,9 @@
     Dim waypointCounter As Integer = 0
     Dim carPosCounter As Integer = 0
     Dim speed As Integer
+    Dim decelerate As Boolean = False
+    Dim firstTime As Boolean = True
+    Dim decCounter = 0
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         canvas = PictureBox1.CreateGraphics()
@@ -28,6 +31,7 @@
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles StrtBtn.Click
+        decelerate = False
         If SpdBox.Text = "" Then
             MessageBox.Show("You cannot leave the speed box empty!", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
         ElseIf SpdBox.Text < 0 Or SpdBox.Text > 100 Then
@@ -35,26 +39,51 @@
         ElseIf SpdBox.Text = 0 Then
             MessageBox.Show("You can't expect a car to move with a speed of 0.", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Else
-            carMovement()
-            speed = 101 - SpdBox.Text
-            moveCar.Interval = speed
-            moveCar.Enabled = True
+            If firstTime = True Then
+                carMovement()
+                speed = 105 - SpdBox.Text
+                moveCar.Interval = speed
+                moveCar.Enabled = True
+            Else
+                speed = 105 - SpdBox.Text
+                moveCar.Interval = speed
+                moveCar.Enabled = True
+            End If
         End If
     End Sub
 
     Private Sub moveCar_Tick(sender As Object, e As EventArgs) Handles moveCar.Tick
         canvas.DrawEllipse(Pens.White, car)
-        If carPosCounter < carPositions.Count Then
-            car.Location = carPositions(carPosCounter)
-            carPosCounter = carPosCounter + 1
+        If decelerate = False Then
+            decCounter = 0
+            If speed > 5 Then
+                speed = speed - 5
+                moveCar.Interval = speed
+            End If
+            If carPosCounter < carPositions.Count Then
+                car.Location = carPositions(carPosCounter)
+                carPosCounter = carPosCounter + 1
+            Else
+                moveCar.Enabled = False
+            End If
         Else
-            moveCar.Enabled = False
+            If decCounter < 5 Then
+                car.Location = carPositions(carPosCounter)
+                carPosCounter = carPosCounter + 1
+                If speed < 105 Then
+                    speed = speed + 5
+                    moveCar.Interval = speed
+                End If
+            End If
+            If speed >= 105 Then
+                moveCar.Enabled = False
+            End If
         End If
         canvas.DrawEllipse(Pens.Blue, car)
     End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles StpBtn.Click
-        moveCar.Enabled = False
+        decelerate = True
     End Sub
 
     Function abs(n As Integer) As Integer
