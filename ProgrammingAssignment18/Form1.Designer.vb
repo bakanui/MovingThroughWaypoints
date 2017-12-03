@@ -31,6 +31,8 @@ Partial Class Form1
         Me.moveCar = New System.Windows.Forms.Timer(Me.components)
         Me.Coordinates = New System.Windows.Forms.Label()
         Me.Label1 = New System.Windows.Forms.Label()
+        Me.TextBox1 = New System.Windows.Forms.TextBox()
+        Me.Label2 = New System.Windows.Forms.Label()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -66,7 +68,7 @@ Partial Class Form1
         '
         'SpdBox
         '
-        Me.SpdBox.Location = New System.Drawing.Point(983, 141)
+        Me.SpdBox.Location = New System.Drawing.Point(487, 18)
         Me.SpdBox.Margin = New System.Windows.Forms.Padding(4)
         Me.SpdBox.Name = "SpdBox"
         Me.SpdBox.Size = New System.Drawing.Size(80, 22)
@@ -78,7 +80,7 @@ Partial Class Form1
         Me.PictureBox1.Location = New System.Drawing.Point(16, 50)
         Me.PictureBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(943, 350)
+        Me.PictureBox1.Size = New System.Drawing.Size(1047, 350)
         Me.PictureBox1.TabIndex = 11
         Me.PictureBox1.TabStop = False
         '
@@ -88,7 +90,7 @@ Partial Class Form1
         'Coordinates
         '
         Me.Coordinates.AutoSize = True
-        Me.Coordinates.Location = New System.Drawing.Point(1001, 384)
+        Me.Coordinates.Location = New System.Drawing.Point(1034, 29)
         Me.Coordinates.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Coordinates.Name = "Coordinates"
         Me.Coordinates.Size = New System.Drawing.Size(29, 17)
@@ -98,11 +100,27 @@ Partial Class Form1
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(987, 107)
+        Me.Label1.Location = New System.Drawing.Point(431, 21)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(76, 17)
+        Me.Label1.Size = New System.Drawing.Size(49, 17)
         Me.Label1.TabIndex = 13
-        Me.Label1.Text = "Speed Box"
+        Me.Label1.Text = "Speed"
+        '
+        'TextBox1
+        '
+        Me.TextBox1.Location = New System.Drawing.Point(647, 16)
+        Me.TextBox1.Name = "TextBox1"
+        Me.TextBox1.Size = New System.Drawing.Size(100, 22)
+        Me.TextBox1.TabIndex = 14
+        '
+        'Label2
+        '
+        Me.Label2.AutoSize = True
+        Me.Label2.Location = New System.Drawing.Point(587, 18)
+        Me.Label2.Name = "Label2"
+        Me.Label2.Size = New System.Drawing.Size(54, 17)
+        Me.Label2.TabIndex = 15
+        Me.Label2.Text = "Torque"
         '
         'Form1
         '
@@ -110,6 +128,8 @@ Partial Class Form1
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.GradientActiveCaption
         Me.ClientSize = New System.Drawing.Size(1076, 415)
+        Me.Controls.Add(Me.Label2)
+        Me.Controls.Add(Me.TextBox1)
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.Coordinates)
         Me.Controls.Add(Me.PictureBox1)
@@ -133,4 +153,6 @@ Partial Class Form1
     Friend WithEvents moveCar As Timer
     Friend WithEvents Coordinates As Label
     Friend WithEvents Label1 As Label
+    Friend WithEvents TextBox1 As TextBox
+    Friend WithEvents Label2 As Label
 End Class
