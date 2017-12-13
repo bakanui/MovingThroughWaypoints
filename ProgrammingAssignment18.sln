@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2009
+VisualStudioVersion = 15.0.27004.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ProgrammingAssignment18", "ProgrammingAssignment18\ProgrammingAssignment18.vbproj", "{82FE73A9-8EF6-4B81-9AC5-85AFE239C1D8}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ProgrammingAssignment18Extend", "ProgrammingAssignment18Extend\ProgrammingAssignment18Extend.vbproj", "{DC060921-74FD-4A69-A6C5-EF309496849A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{82FE73A9-8EF6-4B81-9AC5-85AFE239C1D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82FE73A9-8EF6-4B81-9AC5-85AFE239C1D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82FE73A9-8EF6-4B81-9AC5-85AFE239C1D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC060921-74FD-4A69-A6C5-EF309496849A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC060921-74FD-4A69-A6C5-EF309496849A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC060921-74FD-4A69-A6C5-EF309496849A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC060921-74FD-4A69-A6C5-EF309496849A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

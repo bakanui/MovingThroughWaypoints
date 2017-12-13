@@ -22,9 +22,13 @@
     End Sub
 
     Private Sub PictureBox1_Click(sender As Object, e As EventArgs) Handles PictureBox1.Click
-        Dim waypoint = New Rectangle(X, Y, 10, 10)
-        canvas.DrawRectangle(Pens.Black, X, Y, 10, 10)
-        waypoints.Add(waypoint)
+        If firstTime = True Then
+            Dim waypoint = New Rectangle(X, Y, 10, 10)
+            canvas.DrawRectangle(Pens.Black, X, Y, 10, 10)
+            waypoints.Add(waypoint)
+        Else
+            MessageBox.Show("Please reset to create new waypoints.", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End If
     End Sub
     Private Sub PictureBox1_Paint(ByVal sender As Object, ByVal e As PaintEventArgs) Handles PictureBox1.Paint
         e.Graphics.DrawEllipse(Pens.Blue, car)
@@ -46,6 +50,7 @@
                 speed = 105 - SpdBox.Text
                 moveCar.Interval = speed
                 moveCar.Enabled = True
+                firstTime = False
             Else
                 speed = 105 - SpdBox.Text
                 moveCar.Interval = speed
@@ -57,7 +62,6 @@
     Private Sub moveCar_Tick(sender As Object, e As EventArgs) Handles moveCar.Tick
         canvas.DrawEllipse(Pens.White, car)
         If decelerate = False Then
-            decCounter = 0
             If speed > 5 Then
                 speed = speed - 5
                 moveCar.Interval = speed
@@ -69,15 +73,13 @@
                 decelerate = True
             End If
         Else
-            If decCounter < 10 Then
-                car.Location = carPositions(carPosCounter)
-                carPosCounter = carPosCounter + 1
-                If speed < 105 Then
-                    speed = speed + 5
-                    moveCar.Interval = speed
-                End If
+            car.Location = carPositions(carPosCounter)
+            carPosCounter = carPosCounter + 1
+            If speed < 105 Then
+                speed = speed + 5
+                moveCar.Interval = speed
             End If
-            If speed >= 105 Or carPosCounter = carPositions.Count Then
+            If speed >= 105 Or carPosCounter >= carPositions.Count Then
                 moveCar.Enabled = False
             End If
         End If
@@ -99,7 +101,6 @@
 
     Sub carMovement()
         Dim dx, dy, d, dr, dur, x, y, NextPosX, NextPosY As Integer
-        ' While x <> rectList(counter3).X
         'init
         y = car.Location.Y
         x = car.Location.X
@@ -152,7 +153,6 @@
             End If
             dx = abs(dx)
             dy = abs(dy)
-            'dim point1 as new point(x1 * 20, y1 * 20)
             If NextPosX <= waypoints(waypointCounter).X - 5 And NextPosY <= waypoints(waypointCounter).Y - 5 Then
                 If dx >= dy Then
                     While x < waypoints(waypointCounter).X - 5

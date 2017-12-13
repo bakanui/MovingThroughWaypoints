@@ -81,6 +81,7 @@ Partial Class Form1
         '
         'moveCar
         '
+        Me.moveCar.Interval = 105
         '
         'Coordinates
         '
@@ -104,7 +105,7 @@ Partial Class Form1
         'TorqBox
         '
         Me.TorqBox.Location = New System.Drawing.Point(485, 15)
-        Me.TorqBox.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.TorqBox.Margin = New System.Windows.Forms.Padding(2)
         Me.TorqBox.Name = "TorqBox"
         Me.TorqBox.Size = New System.Drawing.Size(76, 20)
         Me.TorqBox.TabIndex = 14
