@@ -61,6 +61,7 @@
             dy = waypoints(counter).Y - posy
             dx = waypoints(counter).X - posx
             dir = Math.Atan(dy / dx)
+            dir = dir + TorqBox.Text
             If V < Vmax Then
                 V = V + a
             End If
