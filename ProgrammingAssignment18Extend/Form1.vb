@@ -1,13 +1,13 @@
 ﻿Public Class Form1
+    Dim counter As Integer = 0
     Dim X, Y As Integer
     Dim canvas As Graphics
-    Dim V, ax, ay, dir As Integer
+    Dim V, a, ax, ay, dir As Double
     Dim posx As Integer = 5
     Dim posy As Integer = 5
     Dim waypoints = New List(Of Rectangle)
-    Dim car = New Rectangle(posx, posy, 20, 20)
-    Dim speed As Integer
     Dim decelerate As Boolean = False
+    Dim Vmax As Integer = 105
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         canvas = PictureBox1.CreateGraphics()
         SpdBox.Text = "1"
@@ -24,7 +24,7 @@
         waypoints.Add(waypoint)
     End Sub
     Private Sub PictureBox1_Paint(ByVal sender As Object, ByVal e As PaintEventArgs) Handles PictureBox1.Paint
-        e.Graphics.DrawEllipse(Pens.Blue, car)
+        e.Graphics.DrawEllipse(Pens.Blue, posx, posy, 20, 20)
     End Sub
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles StrtBtn.Click
         decelerate = False
@@ -39,8 +39,8 @@
         ElseIf TorqBox.Text = "" Then
             MessageBox.Show("The speed box cannot be left empty!", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Else
-            speed = 101 - SpdBox.Text
-            moveCar.Interval = speed
+            V = 1
+            moveCar.Interval = 101 - SpdBox.Text
             moveCar.Enabled = True
         End If
     End Sub
@@ -56,12 +56,23 @@
         decelerate = False
     End Sub
     Private Sub moveCar_Tick(sender As Object, e As EventArgs) Handles moveCar.Tick
-        Dim counter As Integer = 0
-        dir = (waypoints(counter).y - posy) / (waypoints(counter).x - posx)
-        Dim Vx As Integer = V * Math.Cos(dir)
-        Dim Vy As Integer = V * Math.Sin(dir)
-        canvas.DrawEllipse(Pens.White, car)
-
-        canvas.DrawEllipse(Pens.Blue, car)
+        Dim dy As Integer = waypoints(counter).Y - posy
+        Dim dx As Integer = waypoints(counter).X - posx
+        dir = Math.Atan(dy / dx)
+        If V < Vmax Then
+            V = V + 1
+        End If
+        Dim Vx As Double = V * Math.Cos(dir)
+        Dim Vy As Double = V * Math.Sin(dir)
+        canvas.DrawEllipse(Pens.White, posx, posy, 20, 20)
+        posx = posx + Vx
+        posy = posy + Vy
+        canvas.DrawEllipse(Pens.Blue, posx, posy, 20, 20)
+        If posx = waypoints(counter).X AndAlso posy = waypoints(counter).Y Then
+            moveCar.Enabled = False
+        End If
     End Sub
+    Function ArcTan(X As Double) As Double
+        ArcTan = Math.Atan(X) * (Math.PI / 180)
+    End Function
 End Class
