@@ -3,15 +3,16 @@
     Dim X, Y As Integer
     Dim canvas As Graphics
     Dim V, dy, dx, vy, vx, a, ax, ay, dir As Double
-    Dim posx As Integer = 5
-    Dim posy As Integer = 5
+    Dim posx As Integer = 0
+    Dim posy As Integer = 0
+    Dim car As Rectangle
     Dim waypoints = New List(Of Rectangle)
     Dim decelerate As Boolean = False
     Dim Vmax As Integer = 105
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         canvas = PictureBox1.CreateGraphics()
         SpdBox.Text = "1"
-        TorqBox.Text = "0"
+        TorqBox.Text = "1"
     End Sub
     Private Sub PictureBox1_MouseMove(ByVal sender As Object, ByVal e As MouseEventArgs) Handles PictureBox1.MouseMove
         X = e.X
@@ -24,7 +25,7 @@
         waypoints.Add(waypoint)
     End Sub
     Private Sub PictureBox1_Paint(ByVal sender As Object, ByVal e As PaintEventArgs) Handles PictureBox1.Paint
-        e.Graphics.DrawEllipse(Pens.Blue, posx, posy, 20, 20)
+        e.Graphics.DrawEllipse(Pens.Blue, posx + 5, posy + 5, 20, 20)
     End Sub
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles StrtBtn.Click
         decelerate = False
@@ -41,6 +42,7 @@
         Else
             V = 1
             a = 1
+            dir = 0
             moveCar.Interval = 101 - SpdBox.Text
             moveCar.Enabled = True
         End If
@@ -51,28 +53,36 @@
     Private Sub RstBtn_Click(sender As Object, e As EventArgs) Handles RstBtn.Click
         moveCar.Enabled = False
         SpdBox.Text = "1"
-        TorqBox.Text = "0"
+        TorqBox.Text = "1"
         waypoints.clear()
+        posx = 5
+        posy = 5
+        canvas.DrawEllipse(Pens.Blue, posx + 5, posy + 5, 10, 10)
         PictureBox1.Refresh()
         decelerate = False
     End Sub
     Private Sub moveCar_Tick(sender As Object, e As EventArgs) Handles moveCar.Tick
         If counter < waypoints.Count Then
+            Dim dirwaypoint As Double
             dy = waypoints(counter).Y - posy
             dx = waypoints(counter).X - posx
-            dir = Math.Atan(dy / dx)
+            dirwaypoint = Math.Atan(dy / dx)
             dir = dir + TorqBox.Text
+            If dir > dirwaypoint Then
+                dir = dirwaypoint
+            End If
             If V < Vmax Then
                 V = V + a
             End If
-            Vx = V * Math.Cos(dir)
-            Vy = V * Math.Sin(dir)
-            canvas.DrawEllipse(Pens.White, posx, posy, 20, 20)
-            posx = posx + Vx
-            posy = posy + Vy
-            canvas.DrawEllipse(Pens.Blue, posx, posy, 20, 20)
-            If posx = waypoints(counter).X AndAlso posy = waypoints(counter).Y Then
-                moveCar.Enabled = False
+            vx = V * Math.Cos(dir)
+            vy = V * Math.Sin(dir)
+            canvas.DrawEllipse(Pens.White, posx + 5, posy + 5, 20, 20)
+            posx = posx + vx
+            posy = posy + vy
+            car.Location = New Point(posx, posy)
+            canvas.DrawEllipse(Pens.Blue, posx + 5, posy + 5, 20, 20)
+            If car.IntersectsWith(waypoints(counter)) Then
+                counter = counter + 1
             End If
         Else
             moveCar.Enabled = False
