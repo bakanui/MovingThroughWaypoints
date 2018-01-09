@@ -5,11 +5,9 @@
     Dim V, dy, dx, vy, vx, a, ax, ay, dir, tempdir As Double
     Dim posx As Integer = 5
     Dim posy As Integer = 5
-    Dim car As Rectangle
     Dim waypoints = New List(Of Rectangle)
     Dim decelerate As Boolean = False
     Dim Vmax As Integer = 105
-    Dim cross As Boolean
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         canvas = PictureBox1.CreateGraphics()
         SpdBox.Text = "1"
@@ -22,7 +20,7 @@
     End Sub
     Private Sub PictureBox1_Click(sender As Object, e As EventArgs) Handles PictureBox1.Click
         Dim waypoint = New Rectangle(X, Y, 10, 10)
-        canvas.DrawRectangle(Pens.Black, X, Y, 10, 10)
+        canvas.DrawRectangle(Pens.Black, X + 5, Y + 5, 10, 10)
         waypoints.Add(waypoint)
     End Sub
     Private Sub PictureBox1_Paint(ByVal sender As Object, ByVal e As PaintEventArgs) Handles PictureBox1.Paint
@@ -41,10 +39,8 @@
         ElseIf TorqBox.Text = "" Then
             MessageBox.Show("The speed box cannot be left empty!", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Else
-            V = 1
-            ' a = 0.1
+            V = SpdBox.Text
             dir = 0
-            moveCar.Interval = 101 - SpdBox.Text
             moveCar.Enabled = True
         End If
     End Sub
@@ -72,6 +68,7 @@
             Dim x2 As Integer = waypoints(counter).X
             dy = y2 - posy
             dx = x2 - posx
+            Dim dist As Integer = Math.Sqrt(dy ^ 2 + dx ^ 2)
             dirwaypoint = Math.Atan(dy / dx)
             tempdir = dir
             dir = dir + TorqBox.Text
@@ -80,17 +77,17 @@
             ElseIf dir < dirwaypoint And tempdir > dir Then
                 dir = dirwaypoint
             End If
-            '            If V < Vmax Then
-            '          V = V + a
-            '      End If
+            ' If V < Vmax Then
+            ' V = V + a
+            'End If
             vx = V * Math.Cos(dir)
             vy = V * Math.Sin(dir)
             canvas.DrawEllipse(Pens.White, posx, posy, 20, 20)
             posx = posx + vx
             posy = posy + vy
-            car.Location = New Point(posx, posy)
             canvas.DrawEllipse(Pens.Blue, posx, posy, 20, 20)
-            If posx = x2 AndAlso posy = y2 Then
+            If V > dist Then
+                canvas.DrawRectangle(Pens.White, waypoints(counter))
                 counter = counter + 1
                 dir = 0
             End If
@@ -98,12 +95,4 @@
             moveCar.Enabled = False
         End If
     End Sub
-
-    Function dirCheck(dir As Double, dirwaypoint As Double)
-        If dir > dirwaypoint Then
-            cross = True
-        ElseIf dir < dirwaypoint Then
-            cross = False
-        End If
-    End Function
 End Class
