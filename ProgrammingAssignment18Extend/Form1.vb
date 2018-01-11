@@ -2,13 +2,14 @@
     Dim counter As Integer = 0
     Dim X, Y As Integer
     Dim canvas As Graphics
-    Dim V, dy, dx, vy, vx, a, dir, tempdir As Double
+    Dim V, dy, dx, vy, vx, a, dir, prevdir As Double
     Dim posx As Integer = 5
     Dim posy As Integer = 5
     Dim waypoints = New List(Of Rectangle)
     Dim Vmax As Integer = 50
     Dim firstTime As Boolean = True
     Dim accelerate As Boolean = True
+    Dim dirwaypoint As Double
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         canvas = PictureBox1.CreateGraphics()
         SpdBox.Text = "1"
@@ -41,7 +42,7 @@
         ElseIf waypoints.Count = 0 Then
             MessageBox.Show("The car needs waypoints to pass through. Please input the waypoints.", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
         ElseIf TorqBox.Text = "" Then
-            MessageBox.Show("The speed box cannot be left empty!", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("The torque box cannot be left empty!", "Critical Warning", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Else
             V = SpdBox.Text
             a = 0.1
@@ -63,33 +64,30 @@
         posy = 5
         counter = 0
         dir = 0
-        tempdir = 0
+        prevdir = 0
         canvas.DrawEllipse(Pens.Blue, posx + 5, posy + 5, 10, 10)
         PictureBox1.Refresh()
         firstTime = True
     End Sub
     Private Sub moveCar_Tick(sender As Object, e As EventArgs) Handles moveCar.Tick
         If counter < waypoints.Count Then
-            Dim dirwaypoint As Double
-            Dim y2 As Integer = waypoints(counter).Y
-            Dim x2 As Integer = waypoints(counter).X
-            dy = y2 - posy
-            dx = x2 - posx
+            dy = waypoints(counter).Y - posy
+            dx = waypoints(counter).X - posx
             Dim dist As Integer = Math.Sqrt(dy ^ 2 + dx ^ 2)
-            dirwaypoint = Math.Atan(dy / dx)
-            tempdir = dir
-            dir = dir + TorqBox.Text
-            If dir > dirwaypoint And tempdir < dir Then
-                dir = dirwaypoint
-            ElseIf dir < dirwaypoint And tempdir > dir Then
-                dir = dirwaypoint
+            Dim radians = Math.Atan2(dy, dx)
+            dirwaypoint = radians * (180 / Math.PI)
+            Dim z As Double = (vx * dy) - (vy * dx)
+            If z > 0 Then
+                dir = dir + TorqBox.Text
+            ElseIf z < 0 Then
+                dir = dir - TorqBox.Text
             End If
             If V + 69 > dist AndAlso counter = waypoints.Count - 1 Then
                 accelerate = False
             End If
             acceldecel(accelerate)
-            vx = V * Math.Cos(dir)
-            vy = V * Math.Sin(dir)
+            vx = V * Math.Cos(dir * (Math.PI / 180))
+            vy = V * Math.Sin(dir * (Math.PI / 180))
             canvas.DrawEllipse(Pens.White, posx, posy, 20, 20)
             posx = posx + vx
             posy = posy + vy
@@ -97,7 +95,6 @@
             If V > dist Then
                 canvas.DrawRectangle(Pens.White, waypoints(counter).X + 5, waypoints(counter).Y + 5, 10, 10)
                 counter = counter + 1
-                dir = 0
             End If
         Else
             moveCar.Enabled = False
